@@ -1,0 +1,17 @@
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\bin\Debug\net7.0\CryptoExchangeApp.exe
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\bin\Debug\net7.0\CryptoExchangeApp.deps.json
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\bin\Debug\net7.0\CryptoExchangeApp.runtimeconfig.json
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\bin\Debug\net7.0\CryptoExchangeApp.dll
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\bin\Debug\net7.0\CryptoExchangeApp.pdb
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.csproj.AssemblyReference.cache
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.GeneratedMSBuildEditorConfig.editorconfig
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.AssemblyInfoInputs.cache
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.AssemblyInfo.cs
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.csproj.CoreCompileInputs.cache
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.dll
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\refint\CryptoExchangeApp.dll
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.pdb
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.genruntimeconfig.cache
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\ref\CryptoExchangeApp.dll
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\bin\Debug\net7.0\Newtonsoft.Json.dll
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeApp\obj\Debug\net7.0\CryptoExchangeApp.csproj.CopyComplete
