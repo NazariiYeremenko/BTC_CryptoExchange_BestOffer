@@ -72,15 +72,17 @@ namespace CryptoExchangeApp
         }
     }
 
- static void FindBestSellOffer(List<OrderBook> orderBooksList, decimal desiredBTC)
+static void FindBestSellOffer(List<OrderBook> orderBooksList, decimal desiredBTC)
 {
     decimal totalBTCAvailable = orderBooksList.Sum(orderBook => orderBook.BTCBalance);
-    
+
     if (totalBTCAvailable < desiredBTC)
     {
         Console.WriteLine("Not enough BTC available to sell.");
         return;
     }
+
+    decimal remainingBTC = desiredBTC; // Initialize the remaining BTC
 
     List<List<Offer>> bestOffersPerExchange = new List<List<Offer>>();
 
@@ -89,8 +91,7 @@ namespace CryptoExchangeApp
         List<Offer> bestOffers = new List<Offer>();
 
         // Create a list of bids sorted by total EUR gained in descending order
-        var sortedBids = orderBook.Bids.OrderByDescending(bid =>  bid.Order.Price);
-        decimal remainingBTC = orderBook.BTCBalance;
+        var sortedBids = orderBook.Bids.OrderByDescending(bid => bid.Order.Price);
 
         foreach (var bid in sortedBids)
         {
@@ -121,6 +122,7 @@ namespace CryptoExchangeApp
             Console.WriteLine($"Best Bid Price per BTC: {offer.BestOffer.Order.Price}");
             Console.WriteLine($"BTC to Sell: {offer.BestOffer.Order.Amount}");
             Console.WriteLine($"Total EUR: {offer.TotalEURGained}");
+            Console.WriteLine($"Remaining BTC to Sell: {remainingBTC}"); // Print remaining BTC
             Console.WriteLine();
         }
         Console.WriteLine($"Total EUR Sum: {totalEURSum}");
@@ -132,57 +134,66 @@ namespace CryptoExchangeApp
 }
 
 
- static List<Offer> FindMostProfitableCombination(List<List<Offer>> bestOffersPerExchange, decimal desiredBTC)
- {
-     int numExchanges = bestOffersPerExchange.Count;
-     decimal remainingBTC = desiredBTC;
-     List<Offer> mostProfitableCombination = new List<Offer>();
 
-     while (remainingBTC > 0)
-     {
-         Offer bestOffer = null;
-         int bestExchangeIndex = -1;
+static List<Offer> FindMostProfitableCombination(List<List<Offer>> bestOffersPerExchange, decimal desiredBTC)
+{
+    int numExchanges = bestOffersPerExchange.Count;
+    decimal remainingBTC = desiredBTC;
+    List<Offer> mostProfitableCombination = new List<Offer>();
 
-         for (int i = 0; i < numExchanges; i++)
-         {
-             if (bestOffersPerExchange[i].Count > 0)
-             {
-                 var currentOffer = bestOffersPerExchange[i][0];
+    while (remainingBTC > 0)
+    {
+        Offer bestOffer = null;
+        int bestExchangeIndex = -1;
 
-                 if (bestOffer == null || currentOffer.BestOffer.Order.Price < bestOffer.BestOffer.Order.Price)
-                 {
-                     bestOffer = currentOffer;
-                     bestExchangeIndex = i;
-                 }
-             }
-         }
+        for (int i = 0; i < numExchanges; i++)
+        {
+            if (bestOffersPerExchange[i].Count > 0)
+            {
+                var currentOffer = bestOffersPerExchange[i][0];
 
+                if (bestOffer == null || currentOffer.BestOffer.Order.Price < bestOffer.BestOffer.Order.Price)
+                {
+                    bestOffer = currentOffer;
+                    bestExchangeIndex = i;
+                }
+            }
+        }
 
-         if (bestOffer == null)
-         {
-             // No more profitable offers left to consider
-             break;
-         }
+        if (bestOffer == null)
+        {
+            // No more profitable offers left to consider
+            break;
+        }
 
-         if (remainingBTC >= bestOffer.BestOffer.Order.Amount)
-         {
-             mostProfitableCombination.Add(bestOffer);
-             remainingBTC -= bestOffer.BestOffer.Order.Amount;
-             bestOffersPerExchange[bestExchangeIndex].RemoveAt(0);
-         }
-         else
-         {
-             // Only part of the offer's BTC amount is used
-             var partialOffer = bestOffer;
-             partialOffer.BestOffer.Order.Amount = remainingBTC;
-/*             partialOffer.TotalEURGained = remainingBTC * bestOffer.BestOffer.Order.Price;*/
-             mostProfitableCombination.Add(partialOffer);
-             remainingBTC = 0;
-         }
-     }
+        if (remainingBTC >= bestOffer.BestOffer.Order.Amount)
+        {
+            mostProfitableCombination.Add(bestOffer);
+            remainingBTC -= bestOffer.BestOffer.Order.Amount;
+            bestOffersPerExchange[bestExchangeIndex].RemoveAt(0);
+        }
+        else
+        {
+            // Only part of the offer's BTC amount is used
+            var partialOffer = new Offer(
+                bestOffer.Exchange,
+                new OrderContainer { Order = new Order { Amount = remainingBTC, Price = bestOffer.BestOffer.Order.Price } },
+                remainingBTC * bestOffer.BestOffer.Order.Price,
+                true
+            );
+            mostProfitableCombination.Add(partialOffer);
+            remainingBTC = 0;
+        }
 
-     return mostProfitableCombination;
- }
+        if (remainingBTC > 0 && bestOffersPerExchange.All(exchangeOffers => exchangeOffers.Count == 0))
+        {
+            // If there's remaining BTC but no more offers left to consider, exit the loop
+            break;
+        }
+    }
+
+    return mostProfitableCombination;
+}
 
 
 
