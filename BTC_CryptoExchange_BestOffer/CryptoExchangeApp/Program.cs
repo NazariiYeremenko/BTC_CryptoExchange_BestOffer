@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using CryptoExchangeApp.Processors;
 using CryptoExchangeApp.Models;
@@ -9,39 +10,11 @@ namespace CryptoExchangeApp
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             try
             {
-                var lines = File.ReadAllLines("order_books_data.json");
-
-                var orderBooksList = new List<OrderBook>();
-
-                foreach (var line in lines)
-                {
-                    var parts = line.Split('\t');
-
-                    if (parts.Length != 2)
-                    {
-                        Console.WriteLine($"Invalid line format: {line}");
-                        continue;
-                    }
-
-                    var exchangeId = parts[0];
-                    var jsonStr = parts[1];
-
-                    var orderBook = JsonConvert.DeserializeObject<OrderBook>(jsonStr);
-                    try
-                    {
-                        if (orderBook == null) continue;
-                        orderBook.Id = exchangeId;
-                        orderBooksList.Add(orderBook);
-                    }
-                    catch (NullReferenceException ex)
-                    {
-                        Console.WriteLine($"NullReferenceException: {ex.Message}");
-                    }
-                }
+                var orderBooksList = await OrderBookProcessor.LoadOrderBooksAsync("order_books_data.json");
 
                 while (true)
                 {

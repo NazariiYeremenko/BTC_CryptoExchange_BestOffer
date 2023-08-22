@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoExchangeApp", "CryptoExchangeApp\CryptoExchangeApp.csproj", "{C8239E9C-D15E-4E65-B4C8-866D5F18BCA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoExchangeApp.Tests", "CryptoExchangeApp.Tests\CryptoExchangeApp.Tests.csproj", "{95CBB71F-68BC-423A-8615-468F0631264E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C8239E9C-D15E-4E65-B4C8-866D5F18BCA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8239E9C-D15E-4E65-B4C8-866D5F18BCA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8239E9C-D15E-4E65-B4C8-866D5F18BCA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95CBB71F-68BC-423A-8615-468F0631264E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95CBB71F-68BC-423A-8615-468F0631264E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95CBB71F-68BC-423A-8615-468F0631264E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95CBB71F-68BC-423A-8615-468F0631264E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
