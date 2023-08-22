@@ -7,70 +7,65 @@ namespace CryptoExchangeApp
 {
     internal class Program
     {
-        private static void FindBestBuyOffer(List<OrderBook> orderBooksList, decimal desiredBTC)
+        public enum TradeType
         {
+            Sell,
+            Buy
+        }
+       private static void FindBestBuyOffer(List<OrderBook> orderBooksList, decimal desiredBTC)
+{
+
+    var bestOffersPerExchange = new List<List<Offer>>();
+
+    foreach (var orderBook in orderBooksList)
+    {
         var bestOffers = new List<Offer>();
 
-        foreach (var orderBook in orderBooksList)
+        var remainingBTC = desiredBTC;
+        //Variable to keep track of balance - to take into account only the number of the most profitable transactions, which theoretically will empty the balance of a certain exchanger.
+        var finalEURBalance = orderBook.EURBalance;
+
+        var sortedAsks = orderBook.Asks.OrderBy(ask => ask.Order.Price);
+
+        foreach (var bid in sortedAsks)
         {
-            foreach (var ask in orderBook.Asks)
+            if (remainingBTC > 0 && finalEURBalance > 0)
             {
-                decimal totalEURRequired = desiredBTC * ask.Order.Price;
-
-                if (totalEURRequired <= orderBook.EURBalance)
-                {
-                    bestOffers.Add(new Offer(orderBook, ask, totalEURRequired));
-                }
+                var totalEURRequired = bid.Order.Amount * bid.Order.Price;
+                bestOffers.Add(new Offer(orderBook, bid, totalEURRequired));
+                remainingBTC -= bid.Order.Amount;
+                finalEURBalance -= bid.Order.Amount*bid.Order.Price;
             }
         }
 
-        if (bestOffers.Count > 0)
+        bestOffersPerExchange.Add(bestOffers);
+    }
+
+    var mostProfitableCombination = FindMostProfitableCombination(bestOffersPerExchange, desiredBTC, TradeType.Buy);
+
+    if (mostProfitableCombination is { Count: > 0 })
+    {
+        var totalEURSum = mostProfitableCombination.Sum(offer => offer.TotalEURRequired);
+        Console.WriteLine($"Most profitable offers to buy {desiredBTC} BTC:");
+        foreach (var offer in mostProfitableCombination)
         {
-            // Sort offers by totalEURRequired in ascending order
-            bestOffers.Sort((offer1, offer2) => offer1.TotalEURRequired.CompareTo(offer2.TotalEURRequired));
-
-            var selectedOffers = new List<Offer>();
-            decimal totalEURSum = 0;
-
-            foreach (var offer in bestOffers)
-            {
-                if (totalEURSum + offer.TotalEURRequired <= offer.Exchange.EURBalance)
-                {
-                    selectedOffers.Add(offer);
-                    totalEURSum += offer.TotalEURRequired;
-
-                    if (totalEURSum >= desiredBTC * selectedOffers[0].BestOffer.Order.Price)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if (totalEURSum >= desiredBTC * selectedOffers[0].BestOffer.Order.Price)
-            {
-                Console.WriteLine($"Best offers to buy {desiredBTC} BTC:");
-                foreach (var selectedOffer in selectedOffers)
-                {
-                    Console.WriteLine($"Exchange ID: {selectedOffer.Exchange.Id}");
-                    Console.WriteLine($"EUR Balance: {selectedOffer.Exchange.EURBalance}");
-                    Console.WriteLine($"Desired BTC to Buy: {desiredBTC}");
-                    Console.WriteLine($"Best Ask Price per BTC: {selectedOffer.BestOffer.Order.Price}");
-                    Console.WriteLine($"BTC to Buy: {selectedOffer.TotalEURRequired / selectedOffer.BestOffer.Order.Price}");
-                    Console.WriteLine($"Total EUR: {selectedOffer.TotalEURRequired}");
-                    Console.WriteLine();
-                }
-                Console.WriteLine($"Total EUR Sum: {totalEURSum}");
-            }
-            else
-            {
-                Console.WriteLine($"Not enough funds available to buy {desiredBTC} BTC.");
-            }
+            Console.WriteLine($"Exchange ID: {offer.Exchange.Id}");
+            Console.WriteLine($"EUR Balance: {offer.Exchange.EURBalance}");
+            Console.WriteLine($"Whole desired amount of BTC to Sell: {desiredBTC}");
+            Console.WriteLine($"Best Ask Price per BTC: {offer.BestOffer.Order.Price}");
+            Console.WriteLine($"BTC to Buy: {offer.BestOffer.Order.Amount}");
+            Console.WriteLine($"Total EUR: {offer.TotalEURRequired:F2}");
+            Console.WriteLine($"Remaining BTC to Buy: {offer.RemainingBalance:F2}");
+            Console.WriteLine();
         }
-        else
-        {
-            Console.WriteLine($"No suitable offer found to buy {desiredBTC} BTC.");
-        }
-        }
+        Console.WriteLine($"Total EUR Sum: {totalEURSum:F2}");
+    }
+    else
+    {
+        Console.WriteLine($"No suitable combination found to buy {desiredBTC} BTC.");
+    }
+}
+
 
         private static void FindBestSellOffer(List<OrderBook> orderBooksList, decimal desiredBTC)
         {
@@ -109,7 +104,7 @@ namespace CryptoExchangeApp
             }
 
             // Calculate the most profitable combination of deals among all exchanges
-            var mostProfitableCombination = FindMostProfitableCombination(bestOffersPerExchange, desiredBTC);
+            var mostProfitableCombination = FindMostProfitableCombination(bestOffersPerExchange, desiredBTC, TradeType.Sell );
 
             // Print the most profitable combination
             if (mostProfitableCombination is { Count: > 0 })
@@ -124,7 +119,7 @@ namespace CryptoExchangeApp
                     Console.WriteLine($"Best Bid Price per BTC: {offer.BestOffer.Order.Price}");
                     Console.WriteLine($"BTC to Sell: {offer.BestOffer.Order.Amount}");
                     Console.WriteLine($"Total EUR: {offer.TotalEURGained:F2}");
-                    Console.WriteLine($"Remaining BTC to Sell: {offer.RemainingBTC}"); 
+                    Console.WriteLine($"Remaining BTC to Sell: {offer.RemainingBalance}"); 
                     Console.WriteLine();
                 }
                 Console.WriteLine($"Total EUR Sum: {totalEURSum:F2}");
@@ -136,63 +131,79 @@ namespace CryptoExchangeApp
         }
 
 
-        private static List<Offer> FindMostProfitableCombination(List<List<Offer>> bestOffersPerExchange, decimal desiredBTC)
+private static List<Offer> FindMostProfitableCombination(List<List<Offer>> bestOffersPerExchange, decimal desiredAmount, TradeType tradeType)
+{
+    int numExchanges = bestOffersPerExchange.Count;
+    decimal remainingAmount = desiredAmount;
+    List<Offer> mostProfitableCombination = new List<Offer>();
+
+    while (remainingAmount > 0)
+    {
+        Offer bestOffer = null;
+        int bestExchangeIndexI = -1;
+        int bestExchangeIndexJ = -1;
+
+        for (int i = 0; i < numExchanges; i++)
         {
-            var numExchanges = bestOffersPerExchange.Count;
-            var remainingBTC = desiredBTC;
-            var mostProfitableCombination = new List<Offer>();
-
-            while (remainingBTC > 0)
+            for (int j = 0; j < bestOffersPerExchange[i].Count; j++)
             {
-                Offer bestOffer = null;
-                var bestExchangeIndexI = -1;
-                var bestExchangeIndexJ = -1;
+                var currentOffer = bestOffersPerExchange[i][j];
 
-                for (var i = 0; i < numExchanges; i++)
+                if (bestOffer != null)
                 {
-                    for (var j = 0; j < bestOffersPerExchange[i].Count; j++)
+                    switch (tradeType)
                     {
-                        var currentOffer = bestOffersPerExchange[i][j];
-
-                        if (bestOffer != null && currentOffer.BestOffer.Order.Price <= bestOffer.BestOffer.Order.Price)
+                        case TradeType.Sell when currentOffer.BestOffer.Order.Price <= bestOffer.BestOffer.Order.Price:
+                        case TradeType.Buy when currentOffer.BestOffer.Order.Price >= bestOffer.BestOffer.Order.Price:
                             continue;
-                        bestOffer = currentOffer;
-                        bestExchangeIndexI = i;
-                        bestExchangeIndexJ = j;
+/*                        default:
+                            throw new ArgumentOutOfRangeException(nameof(tradeType), tradeType, null);*/
                     }
                 }
 
-                if (bestOffer == null)
-                {
-                    // No more profitable offers left to consider
-                    break;
-                }
-
-                if (remainingBTC >= bestOffer.BestOffer.Order.Amount)
-                {
-                    remainingBTC -= bestOffer.BestOffer.Order.Amount;
-                    bestOffer.RemainingBTC = remainingBTC;
-                    mostProfitableCombination.Add(bestOffer);
-                    bestOffersPerExchange[bestExchangeIndexI].RemoveAt(bestExchangeIndexJ);
-                }
-                else if(remainingBTC < bestOffer.BestOffer.Order.Amount)
-                {
-                    // Only part of the offer's BTC amount is used
-                    var partialOffer = new Offer(
-                        bestOffer.Exchange,
-                        new OrderContainer { Order = new Order { Amount = remainingBTC, Price = bestOffer.BestOffer.Order.Price } },
-                        remainingBTC * bestOffer.BestOffer.Order.Price,
-                        true
-                    );
-            
-                    mostProfitableCombination.Add(partialOffer);
-                    remainingBTC = 0;
-                }
-
+                bestOffer = currentOffer;
+                bestExchangeIndexI = i;
+                bestExchangeIndexJ = j;
             }
-
-            return mostProfitableCombination;
         }
+
+        if (bestOffer == null)
+        {
+            // No more profitable offers left to consider
+            break;
+        }
+
+        if (remainingAmount >= bestOffer.BestOffer.Order.Amount)
+        {
+            remainingAmount -= bestOffer.BestOffer.Order.Amount;
+            bestOffer.RemainingBalance = remainingAmount;
+            mostProfitableCombination.Add(bestOffer);
+            bestOffersPerExchange[bestExchangeIndexI].RemoveAt(bestExchangeIndexJ);
+        }
+        else if (remainingAmount < bestOffer.BestOffer.Order.Amount)
+        {
+            var partialOffer = tradeType switch
+            {
+                TradeType.Sell => new Offer(bestOffer.Exchange,
+                    new OrderContainer
+                    {
+                        Order = new Order { Amount = remainingAmount, Price = bestOffer.BestOffer.Order.Price }
+                    }, remainingAmount * bestOffer.BestOffer.Order.Price, true),
+                TradeType.Buy => new Offer(bestOffer.Exchange,
+                    new OrderContainer
+                    {
+                        Order = new Order { Amount = remainingAmount, Price = bestOffer.BestOffer.Order.Price }
+                    }, remainingAmount * bestOffer.BestOffer.Order.Price),
+                _ => throw new ArgumentOutOfRangeException(nameof(tradeType), "Invalid trade type.")
+            };
+
+            mostProfitableCombination.Add(partialOffer);
+            remainingAmount = 0;
+        }
+    }
+
+    return mostProfitableCombination;
+}
 
         static void Main(string[] args)
         {
