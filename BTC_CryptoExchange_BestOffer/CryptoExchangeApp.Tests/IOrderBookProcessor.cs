@@ -1,10 +1,11 @@
 using CryptoExchangeApp.Models;
+using static CryptoExchangeApp.Processors.OrderBookProcessor;
 
 namespace CryptoExchangeApp.Tests
 {
     public interface IOrderBookProcessor
     {
-        Task<List<Offer>> FindBestBuyOfferAsync(List<OrderBook> orderBooksList, decimal desiredBtc);
-        Task<List<Offer>> FindBestSellOfferAsync(List<OrderBook> orderBooksList, decimal desiredBtc);
+        List<Offer> FindMostProfitableCombination(List<List<Offer>> bestOffersPerExchange, decimal desiredAmount, TradeType tradeType);
+        Task<List<OrderBook>> LoadOrderBooksAsync(string filePath);
     }
 }

@@ -20,7 +20,7 @@ namespace CryptoExchangeApp.Processors
             {
                 await DeserializeJsonObjectFromStringLine(line, orderBooks);
             }
-            
+
             return SortAsksAndBidsInOrderBooks(orderBooks);
         }
 
@@ -286,7 +286,7 @@ namespace CryptoExchangeApp.Processors
             }
         }
 
-        private enum TradeType
+        public enum TradeType
         {
             Sell,
             Buy

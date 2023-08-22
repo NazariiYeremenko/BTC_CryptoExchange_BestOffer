@@ -10,27 +10,90 @@ namespace CryptoExchangeApp.Tests
 {
     public class OrderBookProcessorTests
     {
-        [Fact]
-        public async Task TestFindBestBuyOfferAsync()
+
+
+        private readonly List<OrderBook> _expectedOrderBooksList = new()
         {
-            // Arrange
-            var orderBookJson = "{\"AcqTime\":\"2019-01-29T11:59:59.5930067Z\",\"Bids\":[{\"Order\":{\"Id\":null,\"Time\":\"0001-01-01T00:00:00\",\"Type\":\"Buy\",\"Kind\":\"Limit\",\"Amount\":0.49667568,\"Price\":2955.46}},{\"Order\":{\"Id\":null,\"Time\":\"0001-01-01T00:00:00\",\"Type\":\"Buy\",\"Kind\":\"Limit\",\"Amount\":0.034,\"Price\":2954.98}}],\"Asks\":[{\"Order\":{\"Id\":null,\"Time\":\"0001-01-01T00:00:00\",\"Type\":\"Sell\",\"Kind\":\"Limit\",\"Amount\":0.01,\"Price\":2960.4}},{\"Order\":{\"Id\":null,\"Time\":\"0001-01-01T00:00:00\",\"Type\":\"Sell\",\"Kind\":\"Limit\",\"Amount\":0.5,\"Price\":2960.42}}]}";
+                new OrderBook("1548763187.72633",
+                    new List<OrderContainer>
+                        {
+                            new() { Order = new Order { Amount = 0.49667568M, Price = 2955.46M } },
+                             new() { Order = new Order { Amount = 0.034M, Price = 2954.98M } },
+                             new() { Order = new Order { Amount = 0.2M, Price = 2946.73M } }
+                        },
+                        new List<OrderContainer>
+                        {
+                            new() { Order = new Order { Amount = 0.06M, Price = 3118.0M } },
+                            new() { Order = new Order { Amount = 0.09512628M, Price = 3119.06M } },
+                            new() { Order = new Order { Amount = 20.0M, Price = 3119.99M } }
+                        })
+        };
+
+        [Fact]
+        public void TestFindMostProfitableCombination()
+        {
+
+
+            const decimal desiredAmount = 0.5M;
+            const OrderBookProcessor.TradeType tradeType = OrderBookProcessor.TradeType.Sell;
+
+            // Create a list of lists of offers for testing
+            var bestOffersPerExchange = new List<List<Offer>>();
+
+            // Create offers for testing
+            var expectedOffers = new List<Offer>
+            {
+                new(_expectedOrderBooksList[0], 
+                    _expectedOrderBooksList[0].Asks[0],
+                    _expectedOrderBooksList[0].Asks[0].Order.Amount*_expectedOrderBooksList[0].Asks[0].Order.Price, 
+                    true),
+                new(_expectedOrderBooksList[0], 
+                    new OrderContainer { Order = new Order { Amount = 0.00332432M, Price = _expectedOrderBooksList[0].Asks[1].Order.Price } }, 
+                    0.00332432M * _expectedOrderBooksList[0].Asks[1].Order.Price, 
+                    true),
+                    
+            };
+            bestOffersPerExchange.Add(expectedOffers);
             
-            var mockFileReader = new Mock<IFileReader>();
-            mockFileReader.Setup(fr => fr.ReadAllTextAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(orderBookJson));
 
-            var desiredBtc = 1;
-            var orderBooksList = new List<OrderBook>();
             var mockProcessor = new Mock<IOrderBookProcessor>();
-            mockProcessor.Setup(p => p.FindBestBuyOfferAsync(orderBooksList, It.IsAny<decimal>()))
-                .Returns((Task<List<Offer>>)Task.CompletedTask);
+            mockProcessor.Setup(p => p.FindMostProfitableCombination(bestOffersPerExchange, desiredAmount, tradeType))
+                .Returns(expectedOffers);
 
-
-/*            var actualResult = OrderBookProcessor.FindBestBuyOffer(orderBooksList,desiredBtc);*/
+            // Act
+            var actualOutput = mockProcessor.Object.FindMostProfitableCombination(bestOffersPerExchange, desiredAmount, tradeType);
 
             // Assert
-            mockProcessor.Verify(p => p.FindBestBuyOfferAsync(orderBooksList, It.IsAny<decimal>()), Times.Once);
+            Assert.Equal(expectedOffers.Count, actualOutput.Count);
         }
+
+        [Fact]
+        public async Task TestLoadOrderBooksAsync()
+        {
+            // Arrange
+            const string orderBookJson = "order_books_test.json";
+
+            var mockProcessor = new Mock<IOrderBookProcessor>();
+            mockProcessor.Setup(p => p.LoadOrderBooksAsync(orderBookJson))
+                .ReturnsAsync(_expectedOrderBooksList); // Set the expected result to be returned
+
+            // Act
+            var resultOrderBooks = await mockProcessor.Object.LoadOrderBooksAsync(orderBookJson);
+
+            // Assert
+            Assert.Equal(_expectedOrderBooksList, resultOrderBooks);
+
+            for (var i = 0; i < _expectedOrderBooksList.Count; i++)
+            {
+                // Compare properties of OrderBook objects
+                Assert.Equal(_expectedOrderBooksList[i].Id, resultOrderBooks[i].Id);
+                Assert.Equal(_expectedOrderBooksList[i].Bids, resultOrderBooks[i].Bids);
+                Assert.Equal(_expectedOrderBooksList[i].Asks, resultOrderBooks[i].Asks);
+
+            }
+
+            mockProcessor.Verify(p => p.LoadOrderBooksAsync(orderBookJson), Times.Once);
+        }
+
     }
 }
