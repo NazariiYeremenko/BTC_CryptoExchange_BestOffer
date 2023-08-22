@@ -6,6 +6,7 @@ public class Offer
     public OrderContainer BestOffer { get; }
     public decimal TotalEURRequired { get; }
     public decimal TotalEURGained { get; }
+    public decimal RemainingBTC { get; set;  }
 
     public Offer(OrderBook exchange, OrderContainer offer, decimal totalEURRequired)
     {
