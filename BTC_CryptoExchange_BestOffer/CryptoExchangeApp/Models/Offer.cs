@@ -1,4 +1,4 @@
-﻿namespace CryptoExchangeApp;
+﻿namespace CryptoExchangeApp.Models;
 
 public class Offer
 {
@@ -6,7 +6,7 @@ public class Offer
     public OrderContainer BestOffer { get; }
     public decimal TotalEURRequired { get; }
     public decimal TotalEURGained { get; }
-    public decimal RemainingBalance { get; set;  }
+    public decimal RemainingBalance { get; set; }
 
     public Offer(OrderBook exchange, OrderContainer offer, decimal totalEURRequired)
     {

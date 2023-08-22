@@ -1,4 +1,4 @@
-﻿namespace CryptoExchangeApp;
+﻿namespace CryptoExchangeApp.Models;
 
 public class Order
 {
