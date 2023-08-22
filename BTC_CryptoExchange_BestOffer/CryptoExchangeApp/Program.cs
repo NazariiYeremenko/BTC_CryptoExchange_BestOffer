@@ -123,11 +123,11 @@ namespace CryptoExchangeApp
                     Console.WriteLine($"Whole desired amount of BTC to Sell: {desiredBTC}");
                     Console.WriteLine($"Best Bid Price per BTC: {offer.BestOffer.Order.Price}");
                     Console.WriteLine($"BTC to Sell: {offer.BestOffer.Order.Amount}");
-                    Console.WriteLine($"Total EUR: {offer.TotalEURGained}");
+                    Console.WriteLine($"Total EUR: {offer.TotalEURGained:F2}");
                     Console.WriteLine($"Remaining BTC to Sell: {offer.RemainingBTC}"); 
                     Console.WriteLine();
                 }
-                Console.WriteLine($"Total EUR Sum: {totalEURSum}");
+                Console.WriteLine($"Total EUR Sum: {totalEURSum:F2}");
             }
             else
             {
@@ -212,14 +212,20 @@ namespace CryptoExchangeApp
                         continue;
                     }
 
-                    var timestampStr = parts[0];
+                    var exchangeId = parts[0]; // Extract exchanger' ID
                     var jsonStr = parts[1];
 
-                    var exchangeId = jsonStr.Substring(2, 8); // Extract exchange ID
                     var orderBook = JsonConvert.DeserializeObject<OrderBook>(jsonStr);
-                    orderBook.Id = exchangeId; // Assign exchange ID to exchanger 
-
-                    orderBooksList.Add(orderBook);
+                    try
+                    {
+                        if (orderBook == null) continue;
+                        orderBook.Id = exchangeId; // Assign exchange ID to exchanger 
+                        orderBooksList.Add(orderBook);
+                    }
+                    catch (NullReferenceException ex)
+                    {
+                        Console.WriteLine($"NullReferenceException: {ex.Message}");
+                    }
                 }
 
                 while (true)
