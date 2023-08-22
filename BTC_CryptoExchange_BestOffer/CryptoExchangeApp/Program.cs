@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using CryptoExchangeApp.Processors;
 using CryptoExchangeApp.Models;
+using static CryptoExchangeApp.Processors.OrderBookProcessor;
 
 namespace CryptoExchangeApp
 {
@@ -14,7 +15,9 @@ namespace CryptoExchangeApp
         {
             try
             {
-                var orderBooksList = await OrderBookProcessor.LoadOrderBooksAsync("order_books_data.json");
+                var solutionDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)?.Parent?.Parent?.Parent?.Parent?.FullName;
+                var filePath = Path.Combine(solutionDirectory ?? string.Empty, "order_books_data.json");
+                var orderBooksList = await OrderBookProcessor.LoadOrderBooksAsync(filePath);
 
                 while (true)
                 {
@@ -32,11 +35,12 @@ namespace CryptoExchangeApp
                     {
                         if (action == "buy")
                         {
-                            OrderBookProcessor.FindBestBuyOffer(orderBooksList, amount);
+                            PrintOffers(FindBestBuyOffer(orderBooksList, amount), amount, TradeType.Buy);
+                            
                         }
                         else
                         {
-                            OrderBookProcessor.FindBestSellOffer(orderBooksList, amount);
+                            PrintOffers(FindBestSellOffer(orderBooksList, amount), amount, TradeType.Sell);
                         }
                     }
                     else

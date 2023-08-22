@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "OfSn7OJbYsiSKUs3BjFDIuoU8sJThZE4hhNqxWjRRt0=",
+  "Source": "CryptoExchangeWebApi",
+  "BasePath": "_content/CryptoExchangeWebApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
