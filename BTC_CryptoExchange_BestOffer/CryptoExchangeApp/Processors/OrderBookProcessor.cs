@@ -14,52 +14,51 @@ namespace CryptoExchangeApp.Processors
         {
             var orderBooks = new List<OrderBook>();
 
-            using var reader = new StreamReader(filePath);
+            var lines = await File.ReadAllLinesAsync(filePath);
 
-            var line = await reader.ReadLineAsync();
-            while (line != null)
+            foreach (var line in lines)
             {
-                await ProcessLineAsync(line, orderBooks);
-                line = await reader.ReadLineAsync();
+                var parts = line?.Split('\t');
+
+                if (parts != null && parts.Length != 2)
+                {
+                    Console.WriteLine($"Invalid line format: {line}");
+                    continue;
+                }
+
+                var exchangeId = parts?[0];
+                var jsonStr = parts?[1];
+
+                if (jsonStr == null) continue;
+
+                var orderBook = JsonConvert.DeserializeObject<OrderBook>(jsonStr);
+                try
+                {
+                    if (orderBook != null)
+                    {
+                        if (exchangeId != null) orderBook.Id = exchangeId;
+                        orderBooks.Add(orderBook);
+                    }
+                }
+                catch (NullReferenceException ex)
+                {
+                    Console.WriteLine($"NullReferenceException: {ex.Message}");
+                }
+            }
+            
+            return SortAsksAndBidsInOrderBooks(orderBooks);
+        }
+
+        public static List<OrderBook> SortAsksAndBidsInOrderBooks(List<OrderBook> orderBooks)
+        {
+            foreach (var orderBook in orderBooks)
+            {
+                orderBook.Asks = orderBook.Asks.OrderBy(ask => ask.Order?.Price ?? 0).ToList();
+                orderBook.Bids = orderBook.Bids.OrderByDescending(bid => bid.Order?.Price ?? 0).ToList();
             }
 
             return orderBooks;
         }
-
-        private static async Task ProcessLineAsync(string line, List<OrderBook> orderBooks)
-        {
-            var parts = line?.Split('\t');
-
-            if (parts != null && parts.Length != 2)
-            {
-                Console.WriteLine($"Invalid line format: {line}");
-                return;
-            }
-
-            var exchangeId = parts?[0];
-            var jsonStr = parts?[1];
-
-            if (jsonStr == null) return;
-
-            var orderBook = await Task.Run(() => JsonConvert.DeserializeObject<OrderBook>(jsonStr));
-            try
-            {
-                if (orderBook != null)
-                {
-                    if (exchangeId != null) orderBook.Id = exchangeId;
-                    lock (orderBooks)
-                    {
-                        orderBooks.Add(orderBook);
-                    }
-                }
-            }
-            catch (NullReferenceException ex)
-            {
-                Console.WriteLine($"NullReferenceException: {ex.Message}");
-            }
-        }
-
-
 
 
         public static void FindBestBuyOffer(List<OrderBook> orderBooksList, decimal desiredBtc)
@@ -74,30 +73,30 @@ namespace CryptoExchangeApp.Processors
                 //Variable to keep track of EUR balance - to take into account only the number of the most profitable transactions, which theoretically will empty the balance of a certain exchanger.
                 var finalEurBalance = orderBook.EurBalance;
 
-                //Lowest prices on top
-                var sortedAsks = orderBook.Asks.OrderBy(ask => ask.Order?.Price ?? 0);
 
-                foreach (var bid in sortedAsks)
+                foreach (var ask in orderBook.Asks)
                 {
-                    if (remainingBtc <= 0 || finalEurBalance <= 0 || bid.Order == null) continue;
+                    if (remainingBtc > 0 && finalEurBalance > 0 && ask.Order != null)
+                    {
+                        var btcToUse = Math.Min(finalEurBalance / ask.Order.Price, ask.Order.Amount);
+
+                        // Calculate the total EUR required to purchase the maximum BTC amount
+                        var totalEurRequired = btcToUse * ask.Order.Price;
+
+                        // Create a new Order object for the offer that can possibly be partial
+                        var order = new Order
+                        {
+                            Amount = btcToUse,
+                            Price = ask.Order.Price
+                        };
+
+                        bestOffers.Add(new Offer(orderBook, new OrderContainer { Order = order }, totalEurRequired));
+
+                        // Update remaining BTC and EUR balances based on the partial deal
+                        remainingBtc -= btcToUse;
+                        finalEurBalance -= totalEurRequired;
+                    }
                     // Calculate the maximum BTC amount from this bid that can be purchased with the remaining EUR balance on exchanger
-                    var btcToUse = Math.Min(finalEurBalance / bid.Order.Price, bid.Order.Amount);
-
-                    // Calculate the total EUR required to purchase the maximum BTC amount
-                    var totalEurRequired = btcToUse * bid.Order.Price;
-
-                    // Create a new Order object for the offer that can possibly be partial
-                    var order = new Order
-                    { 
-                        Amount = btcToUse,
-                        Price = bid.Order.Price
-                    };
-
-                    bestOffers.Add(new Offer(orderBook, new OrderContainer { Order = order }, totalEurRequired));
-
-                    // Update remaining BTC and EUR balances based on the partial deal
-                    remainingBtc -= btcToUse;
-                    finalEurBalance -= totalEurRequired;
                 }
 
                 bestOffersPerExchange.Add(bestOffers);
@@ -130,35 +129,35 @@ namespace CryptoExchangeApp.Processors
                 //Variable to keep track of BTC balance - to take into account only the number of the most profitable transactions, which theoretically will empty the balance of a certain exchanger.
                 var finalBtcBalance = orderBook.BtcBalance;
 
-                //Highest prices on top
-                var sortedBids = orderBook.Bids.OrderByDescending(bid => bid.Order?.Price ?? 0);
 
-                foreach (var bid in sortedBids)
+                foreach (var bid in orderBook.Bids)
                 {
-                    if (remainingBtc <= 0 || finalBtcBalance <= 0)
+                    if (remainingBtc <= 0 || finalBtcBalance <= 0 || bid.Order != null)
+                    {
+                        var eurToUse = Math.Min(finalBtcBalance * bid.Order.Price, bid.Order.Amount * bid.Order.Price);
+
+                        // Calculate the BTC amount to be used in the offer
+                        var btcToUse = Math.Min(finalBtcBalance, bid.Order.Amount);
+
+                        // Create a new Order object for the offer that can possibly be partial
+                        var order = new Order
+                        {
+                            Amount = btcToUse,
+                            Price = bid.Order.Price
+                        };
+
+                        bestOffers.Add(new Offer(orderBook, new OrderContainer { Order = order }, eurToUse, true));
+
+                        // Update remaining BTC and EUR balances based on the deal
+                        remainingBtc -= btcToUse;
+                        finalBtcBalance -= btcToUse;
+                    }
+                    else
                     {
                         break; // Exit the loop if remaining BTC or BTC balance is non-positive
                     }
-
-                    if (bid.Order == null) continue;
+                    
                     // Calculate how much EUR is required to purchase amount of BTC from bid (fully or partial) 
-                    var eurToUse = Math.Min(finalBtcBalance * bid.Order.Price, bid.Order.Amount * bid.Order.Price);
-
-                    // Calculate the BTC amount to be used in the offer
-                    var btcToUse = Math.Min(finalBtcBalance, bid.Order.Amount);
-
-                    // Create a new Order object for the offer that can possibly be partial
-                    var order = new Order
-                    { 
-                        Amount = btcToUse,
-                        Price = bid.Order.Price
-                    };
-
-                    bestOffers.Add(new Offer(orderBook, new OrderContainer { Order = order }, eurToUse, true));
-
-                    // Update remaining BTC and EUR balances based on the deal
-                    remainingBtc -= btcToUse;
-                    finalBtcBalance -= btcToUse;
                 }
 
                 bestOffersPerExchange.Add(bestOffers);
