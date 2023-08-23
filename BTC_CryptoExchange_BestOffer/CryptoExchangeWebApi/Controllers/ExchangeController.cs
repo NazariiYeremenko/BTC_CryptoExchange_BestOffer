@@ -14,8 +14,8 @@ namespace CryptoExchangeWebApi.Controllers
     public class ExchangeController : ControllerBase
     {
 
-        [HttpPost("findBestOffer")]
-        public async Task<IActionResult> FindBestOffer([FromBody] OfferRequest offerRequest)
+        [HttpGet("findBestOffer")]
+        public async Task<IActionResult> FindBestOffer([FromQuery] OfferRequest offerRequest)
         {
             try
             {
