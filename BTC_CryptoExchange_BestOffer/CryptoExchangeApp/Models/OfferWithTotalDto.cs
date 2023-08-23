@@ -11,9 +11,6 @@ namespace CryptoExchangeApp.Models
         public List<SimplifiedOffer> MostProfitableCombination { get; set; }
         public decimal TotalEur { get; set; }
 
-        public OfferWithTotalDto(List<SimplifiedOffer> mostProfitableCombination)
-        {
-            MostProfitableCombination = mostProfitableCombination;
-        }
+
     }
 }
