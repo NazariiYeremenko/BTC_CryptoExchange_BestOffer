@@ -37,3 +37,4 @@ D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange
 D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeWebApi\obj\Debug\net7.0\CryptoExchangeWebApi.pdb
 D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeWebApi\obj\Debug\net7.0\CryptoExchangeWebApi.genruntimeconfig.cache
 D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeWebApi\obj\Debug\net7.0\ref\CryptoExchangeWebApi.dll
+D:\Nazar\Projects\TestTaskForCML\BTC_CryptoExchange_BestOffer\BTC_CryptoExchange_BestOffer\CryptoExchangeWebApi\bin\Debug\net7.0\Swashbuckle.AspNetCore.Annotations.dll

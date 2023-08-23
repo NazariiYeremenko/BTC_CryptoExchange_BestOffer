@@ -17,7 +17,7 @@ namespace CryptoExchangeApp
             {
                 var solutionDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)?.Parent?.Parent?.Parent?.Parent?.FullName;
                 var filePath = Path.Combine(solutionDirectory ?? string.Empty, "order_books_data.json");
-                var orderBooksList = await OrderBookProcessor.LoadOrderBooksAsync(filePath);
+                var orderBooksList = await LoadOrderBooksAsync(filePath);
 
                 while (true)
                 {

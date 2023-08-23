@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CryptoExchangeApp.Models;
 using CryptoExchangeApp.Processors;
+using CryptoExchangeWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -12,12 +13,6 @@ namespace CryptoExchangeWebApi.Controllers
     [ApiController]
     public class ExchangeController : ControllerBase
     {
-        private readonly OrderBookProcessor _orderBookProcessor;
-
-        public ExchangeController(OrderBookProcessor orderBookProcessor, IWebHostEnvironment env)
-        {
-            _orderBookProcessor = orderBookProcessor;
-        }
 
         [HttpPost("findBestOffer")]
         public async Task<IActionResult> FindBestOffer([FromBody] OfferRequest offerRequest)
@@ -36,28 +31,47 @@ namespace CryptoExchangeWebApi.Controllers
 
                 var orderBooksList = await OrderBookProcessor.LoadOrderBooksAsync(filePath);
 
-                List<Offer> mostProfitableCombination;
+                var finalOffer = new OfferWithTotalDto();
                 if (tradeType == OrderBookProcessor.TradeType.Buy)
                 {
-                    mostProfitableCombination = OrderBookProcessor.FindBestBuyOffer(orderBooksList, offerRequest.DesiredAmount);
+                    finalOffer.MostProfitableCombination = OrderBookProcessor.FindBestBuyOffer(orderBooksList, offerRequest.DesiredAmount)
+                        .Select(offer => new SimplifiedOffer
+                        {
+                            BestOffer = offer.BestOffer,
+                            TotalEurRequired = offer.TotalEURRequired,
+                            RemainingBtcToBuy = offer.RemainingBalance,
+                            ExchangerId = offer.Exchange.Id,
+                        })
+                        .ToList();
+                    foreach (var offer in finalOffer.MostProfitableCombination)
+                    {
+                        finalOffer.TotalEur += offer.TotalEurRequired;
+                    }
                 }
                 else
                 {
-                    mostProfitableCombination = OrderBookProcessor.FindBestSellOffer(orderBooksList, offerRequest.DesiredAmount);
+                    finalOffer.MostProfitableCombination = OrderBookProcessor.FindBestBuyOffer(orderBooksList, offerRequest.DesiredAmount)
+                        .Select(offer => new SimplifiedOffer
+                        {
+                            BestOffer = offer.BestOffer,
+                            TotalEurGained = offer.TotalEURGained,
+                            RemainingBtcToSell = offer.RemainingBalance,
+                            ExchangerId = offer.Exchange.Id,
+                        })
+                        .ToList();
+                    foreach (var offer in finalOffer.MostProfitableCombination)
+                    {
+                        finalOffer.TotalEur += offer.TotalEurGained;
+                    }
                 }
 
-                return Ok(mostProfitableCombination);
+                return Ok(finalOffer);
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 return BadRequest(ex.Message);
             }
         }
-    }
 
-    public class OfferRequest
-    {
-        public string TradeType { get; set; }
-        public decimal DesiredAmount { get; set; }
     }
 }

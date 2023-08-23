@@ -1,7 +1,14 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\BTC_CryptoExchange_BestOffer",
+    "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeApp",
+    "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeApp.Tests",
+    "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeApp\\Models",
+    "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeApp\\Processors",
+    "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeWebApi",
+    "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeWebApi\\Controllers"
   ],
-  "SelectedNode": "\\BTC_CryptoExchange_BestOffer.sln",
+  "SelectedNode": "\\BTC_CryptoExchange_BestOffer\\CryptoExchangeApp\\Processors\\OrderBookProcessor.cs",
   "PreviewInSolutionExplorer": false
 }
