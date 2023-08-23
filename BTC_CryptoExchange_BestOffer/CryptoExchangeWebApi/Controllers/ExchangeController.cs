@@ -50,7 +50,7 @@ namespace CryptoExchangeWebApi.Controllers
                 }
                 else
                 {
-                    finalOffer.MostProfitableCombination = OrderBookProcessor.FindBestBuyOffer(orderBooksList, offerRequest.DesiredAmount)
+                    finalOffer.MostProfitableCombination = OrderBookProcessor.FindBestSellOffer(orderBooksList, offerRequest.DesiredAmount)
                         .Select(offer => new SimplifiedOffer
                         {
                             BestOffer = offer.BestOffer,
