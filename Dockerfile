@@ -7,11 +7,11 @@ WORKDIR /src
 COPY ["CryptoExchangeWebApi/CryptoExchangeWebApi.csproj", "CryptoExchangeWebApi/"]
 RUN dotnet restore "CryptoExchangeWebApi/CryptoExchangeWebApi.csproj"
 COPY . .
-WORKDIR "/src/CryptoExchangeWebApi"
-RUN dotnet build "CryptoExchangeWebApi.csproj" -c Release -o /app/build
+WORKDIR "/src"
+RUN dotnet build "CryptoExchangeWebApi/CryptoExchangeWebApi.csproj" -c Release -o CryptoExchangeWebApi/app/build
 
 FROM build AS publish
-RUN dotnet publish "CryptoExchangeWebApi.csproj" -c Release -o /app/publish
+RUN dotnet publish "CryptoExchangeWebApi/CryptoExchangeWebApi.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
