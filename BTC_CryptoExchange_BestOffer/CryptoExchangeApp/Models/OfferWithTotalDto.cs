@@ -10,7 +10,5 @@ namespace CryptoExchangeApp.Models
     {
         public List<SimplifiedOffer> MostProfitableCombination { get; set; }
         public decimal TotalEur { get; set; }
-
-
     }
 }

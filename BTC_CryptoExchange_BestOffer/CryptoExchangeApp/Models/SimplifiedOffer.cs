@@ -12,11 +12,8 @@ namespace CryptoExchangeApp.Models
         public decimal TotalEurRequired { get; set; }
         public decimal TotalEurGained { get; set; }
         public decimal RemainingBtcToBuy { get; set; }
-
         public decimal RemainingBtcToSell { get; set; }
         public string ExchangerId { get; set; }
-
-
     }
 }
 

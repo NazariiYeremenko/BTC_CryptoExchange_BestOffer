@@ -7,7 +7,6 @@ public class Offer
     public decimal TotalEURRequired { get; }
     public decimal TotalEURGained { get; }
     public decimal RemainingBalance { get; set; }
-
     public Offer(OrderBook exchange, OrderContainer offer, decimal totalEURRequired)
     {
         Exchange = exchange;
@@ -15,7 +14,6 @@ public class Offer
         TotalEURRequired = totalEURRequired;
         TotalEURGained = 0;
     }
-
     public Offer(OrderBook exchange, OrderContainer offer, decimal totalEURGained, bool isSell)
     {
         Exchange = exchange;

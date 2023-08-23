@@ -32,8 +32,6 @@ namespace CryptoExchangeApp.Tests
         [Fact]
         public void TestFindMostProfitableCombination()
         {
-
-
             const decimal desiredAmount = 0.5M;
             const OrderBookProcessor.TradeType tradeType = OrderBookProcessor.TradeType.Sell;
 
@@ -54,15 +52,11 @@ namespace CryptoExchangeApp.Tests
                     
             };
             bestOffersPerExchange.Add(expectedOffers);
-            
-
             var mockProcessor = new Mock<IOrderBookProcessor>();
             mockProcessor.Setup(p => p.FindMostProfitableCombination(bestOffersPerExchange, desiredAmount, tradeType))
                 .Returns(expectedOffers);
-
             // Act
             var actualOutput = mockProcessor.Object.FindMostProfitableCombination(bestOffersPerExchange, desiredAmount, tradeType);
-
             // Assert
             Assert.Equal(expectedOffers.Count, actualOutput.Count);
         }
@@ -76,10 +70,8 @@ namespace CryptoExchangeApp.Tests
             var mockProcessor = new Mock<IOrderBookProcessor>();
             mockProcessor.Setup(p => p.LoadOrderBooksAsync(orderBookJson))
                 .ReturnsAsync(_expectedOrderBooksList); // Set the expected result to be returned
-
             // Act
             var resultOrderBooks = await mockProcessor.Object.LoadOrderBooksAsync(orderBookJson);
-
             // Assert
             Assert.Equal(_expectedOrderBooksList, resultOrderBooks);
 
@@ -91,7 +83,6 @@ namespace CryptoExchangeApp.Tests
                 Assert.Equal(_expectedOrderBooksList[i].Asks, resultOrderBooks[i].Asks);
 
             }
-
             mockProcessor.Verify(p => p.LoadOrderBooksAsync(orderBookJson), Times.Once);
         }
 

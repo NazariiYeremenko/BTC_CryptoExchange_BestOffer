@@ -15,9 +15,7 @@ namespace CryptoExchangeApp
         {
             try
             {
-                var solutionDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)?.Parent?.Parent?.Parent?.Parent?.FullName;
-                var filePath = Path.Combine(solutionDirectory ?? string.Empty, "order_books_data.json");
-                var orderBooksList = await LoadOrderBooksAsync(filePath);
+                var orderBooksList = await LoadOrderBooksAsync();
 
                 while (true)
                 {
@@ -29,14 +27,12 @@ namespace CryptoExchangeApp
                         Console.WriteLine("Invalid input. Please enter 'buy' or 'sell'.");
                         continue;
                     }
-
                     Console.Write($"How much BTC do you want to {action}? ");
                     if (decimal.TryParse(Console.ReadLine(), out var amount))
                     {
                         if (action == "buy")
                         {
                             PrintOffers(FindBestBuyOffer(orderBooksList, amount), amount, TradeType.Buy);
-                            
                         }
                         else
                         {
