@@ -5,6 +5,7 @@ using CryptoExchangeApp.Models;
 using CryptoExchangeApp.Processors;
 using CryptoExchangeWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 
 namespace CryptoExchangeWebApi.Controllers
@@ -15,6 +16,12 @@ namespace CryptoExchangeWebApi.Controllers
     {
 
         [HttpGet("findBestOffer")]
+        [SwaggerOperation(
+            Description = "Finds the most profitable combination of orders based on the specified trade type and desired amount of BTC. TradeType: 0 - Buy, 1 - Sell."
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "The most profitable combination", typeof(OfferWithTotalDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Bad request")]
+        [Produces("application/json")] 
         public async Task<IActionResult> FindBestOffer([FromQuery] OfferRequest offerRequest)
         {
             try
@@ -22,17 +29,17 @@ namespace CryptoExchangeWebApi.Controllers
                 var solutionDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)?.Parent?.Parent?.Parent?.Parent?.FullName;
                 var filePath = Path.Combine(solutionDirectory ?? string.Empty, "order_books_data.json");
 
-                if (offerRequest.TradeType != "buy" && offerRequest.TradeType != "sell")
+/*                if (offerRequest.TradeType != "buy" && offerRequest.TradeType != "sell")
                 {
                     return BadRequest("Invalid trade type. Please specify 'buy' or 'sell'.");
                 }
 
-                var tradeType = offerRequest.TradeType == "buy" ? OrderBookProcessor.TradeType.Buy : OrderBookProcessor.TradeType.Sell;
+                var tradeType = offerRequest.TradeType == "buy" ? OrderBookProcessor.TradeType.Buy : OrderBookProcessor.TradeType.Sell;*/
 
                 var orderBooksList = await OrderBookProcessor.LoadOrderBooksAsync(filePath);
 
                 var finalOffer = new OfferWithTotalDto();
-                if (tradeType == OrderBookProcessor.TradeType.Buy)
+                if (offerRequest.TradeType == TradeType.Buy)
                 {
                     finalOffer.MostProfitableCombination = OrderBookProcessor.FindBestBuyOffer(orderBooksList, offerRequest.DesiredAmount)
                         .Select(offer => new SimplifiedOffer
