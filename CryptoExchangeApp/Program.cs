@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using CryptoExchangeApp.Processors;
-using CryptoExchangeApp.Models;
-using static CryptoExchangeApp.Processors.OrderBookProcessor;
+﻿using static CryptoExchangeApp.Processors.OrderBookProcessor;
 
 namespace CryptoExchangeApp
 {

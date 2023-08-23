@@ -1,8 +1,4 @@
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using CryptoExchangeApp.Models;
-using CryptoExchangeApp.Processors;
 using CryptoExchangeWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -26,7 +22,7 @@ namespace CryptoExchangeWebApi.Controllers
             try
             {
                 var tradeType = Enum.GetName(typeof(TradeType), offerRequest.TradeType);
-                var finalOffer = await GetOfferWithTotalDto(tradeType ?? string.Empty, offerRequest.DesiredAmount);
+                var finalOffer = await GetOfferWithTotalDto(tradeType, offerRequest.DesiredAmount);
                 return Ok(finalOffer);
             }
             catch (Exception ex) 

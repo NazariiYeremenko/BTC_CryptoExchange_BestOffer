@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using CryptoExchangeApp.Processors;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace CryptoExchangeWebApi.Models
 {

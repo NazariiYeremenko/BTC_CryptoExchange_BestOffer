@@ -1,6 +1,5 @@
 using CryptoExchangeApp.Processors;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 

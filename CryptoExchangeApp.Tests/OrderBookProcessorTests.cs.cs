@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CryptoExchangeApp.Models;
 using CryptoExchangeApp.Processors;
 using Moq;
-using Xunit;
 
 namespace CryptoExchangeApp.Tests
 {
