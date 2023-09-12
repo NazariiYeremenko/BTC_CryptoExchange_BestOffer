@@ -2,7 +2,7 @@
 
 Description:
 
-An application that parses JSON-structured file into each crypto-exchanger’s order books. Order book consists of a bunch of bids/asks, where the user can possibly buy or sell a certain amount of BTC.
+An application that parses JSON-structured file into each crypto-exchanger’s order book. Order book consists of a bunch of bids/asks, where the user can possibly buy or sell certain amount of BTC.
 Also, for each exchanger, there’s a unique user’s balance for both BTC and EUR.
 
 Whenever the user wants to buy a certain amount of BTC, the algorithm first analyzes every exchanger’s order book to form a list of the most profitable deals. 
